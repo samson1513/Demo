@@ -17,6 +17,7 @@ public class AnimationView extends View implements SurfaceHolder.Callback {
     private static int SIDE = 200;
     private static int START_X = 150;
     private int AXIS_Y, END_X, LENGTH;
+    private float degrees = -1.58f;
     private boolean isAnimate = false;
     private boolean isPreview = true;
 
@@ -70,6 +71,7 @@ public class AnimationView extends View implements SurfaceHolder.Callback {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                degrees = -degrees;
                 for (x = START_X; x <= END_X; ++x) {
                     try {
                         Thread.sleep(1);
@@ -79,6 +81,7 @@ public class AnimationView extends View implements SurfaceHolder.Callback {
                     y = (int) (500 * Math.sin(2 * Math.PI * (x - START_X) / LENGTH)) + AXIS_Y;
                     postInvalidate();
                 }
+                degrees = -degrees;
                 for (x = END_X; x >= START_X; --x) {
                     try {
                         Thread.sleep(1);
@@ -103,21 +106,28 @@ public class AnimationView extends View implements SurfaceHolder.Callback {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.drawColor(Color.BLACK);
 
         if (isPreview) {
             AXIS_Y = getHeight() / 2;
             END_X = getWidth() - START_X;
             LENGTH = END_X - START_X;
-            canvas.drawRect(START_X - RADIUS, AXIS_Y - RADIUS, START_X + RADIUS, AXIS_Y + RADIUS, paint);
+            Bitmap bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas temp = new Canvas(bitmap);
+            temp.drawColor(Color.BLACK);
+            temp.drawRect(START_X - RADIUS, AXIS_Y - RADIUS, START_X + RADIUS, AXIS_Y + RADIUS, paint);
+            canvas.drawBitmap(bitmap, 0, 0, null);
+            square = Bitmap.createBitmap(bitmap,START_X - RADIUS, AXIS_Y - RADIUS, SIDE, SIDE);
+            rotator = new Matrix();
         } else {
-            canvas.drawRect(x - RADIUS, y - RADIUS, x + RADIUS, y + RADIUS, paint);
+            rotator.preRotate(degrees, square.getWidth() / 2, square.getHeight() / 2);
+            canvas.drawColor(Color.BLACK);
+            canvas.drawBitmap(Bitmap.createBitmap(square, 0, 0, SIDE, SIDE, rotator, false), x - RADIUS, y - RADIUS, null);
         }
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-//        animator = new AnimatorThread(getHolder(), this);
+//        animator = new AnimatorThread(getHolder());
         animator.start();
     }
 
@@ -143,12 +153,10 @@ public class AnimationView extends View implements SurfaceHolder.Callback {
     private class AnimatorThread extends Thread {
 
         private SurfaceHolder surfaceHolder;
-        private AnimationView surface;
         private boolean running = false;
 
-        public AnimatorThread(SurfaceHolder _surfaceHolder, AnimationView _surface) {
+        public AnimatorThread(SurfaceHolder _surfaceHolder) {
             this.surfaceHolder = _surfaceHolder;
-            this.surface = _surface;
 
             AXIS_Y = getHeight() / 2;
             END_X = getWidth() - START_X;
