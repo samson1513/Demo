@@ -17,7 +17,8 @@ public class FragmentAnimationView extends Fragment implements View.OnClickListe
     private MainActivity mCallingActivity;
 
     private AnimationView animationView;
-    private Button mThread, mAsync, mClose;
+    private AnimationSurfaceView animationSurface;
+    private Button mThread, mSurface, mClose;
     private LinearLayout contAnim;
 
     @Override
@@ -36,24 +37,17 @@ public class FragmentAnimationView extends Fragment implements View.OnClickListe
     }
 
     private void findUI(View _view){
-        mAsync = (Button) _view.findViewById(R.id.btnAnimSurface);
-        mThread = (Button) _view.findViewById(R.id.btnAnimThread);
-        mClose = (Button) _view.findViewById(R.id.btnClose);
-        contAnim = (LinearLayout) _view.findViewById(R.id.contAnim);
+        mSurface            = (Button) _view.findViewById(R.id.btnAnimSurface);
+        mThread             = (Button) _view.findViewById(R.id.btnAnimThread);
+        mClose              = (Button) _view.findViewById(R.id.btnClose);
 
-        animationView = new AnimationView(mCallingActivity);
-        animationView.setLayoutParams(
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                )
-        );
-        contAnim.addView(animationView);
+        animationView       = (AnimationView) _view.findViewById(R.id.animView);
+        animationSurface    = (AnimationSurfaceView) _view.findViewById(R.id.animSurface);
     }
 
     private void setListener(){
         mClose.setOnClickListener(this);
-        mAsync.setOnClickListener(this);
+        mSurface.setOnClickListener(this);
         mThread.setOnClickListener(this);
     }
 
@@ -61,17 +55,27 @@ public class FragmentAnimationView extends Fragment implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btnClose:
-                if(!animationView.isAnimate())
+                if(animIsFinished())
                     mCallingActivity.setVisivilityViews(true);
                 break;
             case R.id.btnAnimSurface:
-                if(!animationView.isAnimate())
-                    animationView.showAnim(Constants.ANIM_SURFACE);
+                if(animIsFinished()) {
+                    animationView.setVisibility(View.GONE);
+                    animationSurface.setVisibility(View.VISIBLE);
+                    animationSurface.showAnim();
+                }
                 break;
             case R.id.btnAnimThread:
-                if(!animationView.isAnimate())
-                    animationView.showAnim(Constants.ANIM_THREAD);
+                if(animIsFinished()) {
+                    animationSurface.setVisibility(View.GONE);
+                    animationView.setVisibility(View.VISIBLE);
+                    animationView.showAnim();
+                }
                 break;
         }
+    }
+
+    private boolean animIsFinished(){
+        return !(animationView.isAnimate() || animationSurface.isAnimate());
     }
 }

@@ -2,12 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
-        android:orientation="vertical"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/contAnim"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:background="#000">
+        <com.example.samson.demo.AnimationSurfaceView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/animSurface"
+            android:visibility="visible"/>
+        <com.example.samson.demo.AnimationView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/animView"
+            android:visibility="visible"/>
+    </RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="120dp">
@@ -19,12 +30,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/btnAnimThread"
-                android:text="thread"/>
+                android:text="onDraw"/>
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/btnAnimSurface"
-                android:text="AsyncTask"/>
+                android:text="SurfaceHolder"/>
         </LinearLayout>
         <Button
             android:layout_width="wrap_content"
