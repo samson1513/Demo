@@ -55,6 +55,7 @@ public class AnimationSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        animator.setRunning(false);
         boolean retry = true;
         while (retry) {
             try {
@@ -76,7 +77,7 @@ public class AnimationSurfaceView extends SurfaceView implements SurfaceHolder.C
         private int x, y;
         private boolean running = false;
 
-        private SurfaceHolder surfaceHolder;
+        private final SurfaceHolder surfaceHolder;
 
         private Paint paint;
         private Canvas canvas;
@@ -114,24 +115,33 @@ public class AnimationSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         @Override
         public void run() {
-            while(running) {
+            if(running) {
                 isAnimate = true;
                 for (x = START_X; x <= END_X; ++x) {
                     y = (int) (500 * Math.sin(2 * Math.PI * (x - START_X) / LENGTH)) + AXIS_Y;
-                    canvas = surfaceHolder.lockCanvas();
-                    canvas.drawColor(Color.BLACK);
-                    canvas.drawRect(x - RADIUS, y - RADIUS, x + RADIUS, y + RADIUS, paint);
-                    surfaceHolder.unlockCanvasAndPost(canvas);
+                    draw();
                 }
                 for (x = END_X; x >= START_X; --x) {
                     y = (int) -(500 * Math.sin(2 * Math.PI * (x - START_X) / LENGTH)) + AXIS_Y;
-                    canvas = surfaceHolder.lockCanvas();
-                    canvas.drawColor(Color.BLACK);
-                    canvas.drawRect(x - RADIUS, y - RADIUS, x + RADIUS, y + RADIUS, paint);
-                    surfaceHolder.unlockCanvasAndPost(canvas);
+                    draw();
                 }
                 isAnimate = false;
                 running = false;
+            }
+        }
+
+        private void draw(){
+            try {
+                canvas = surfaceHolder.lockCanvas();
+                synchronized (surfaceHolder) {
+                    if(canvas != null) {
+                        canvas.drawColor(Color.BLACK);
+                        canvas.drawRect(x - RADIUS, y - RADIUS, x + RADIUS, y + RADIUS, paint);
+                    }
+                }
+            } finally {
+                if(canvas != null)
+                    surfaceHolder.unlockCanvasAndPost(canvas);
             }
         }
     }
